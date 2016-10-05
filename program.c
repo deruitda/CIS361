@@ -12,21 +12,35 @@ void initializeDecryptArray(char encrypt[], char decrypt);
 
 void processInput(FILE * inf, FILE * outf, char substitute[]);
 
-int main()
+char *key;
+int choice;
+char *inputFile;
+char *outputFile;
+int main(int argc, char **argv)
 {
-
-	FILE *input = fopen("test.txt", "rb");
+	if(argc < 5)
+	{
+		printf("Not enough arguments specified. The arguments are: [Encryption key] [Function (1 for encrypt 2 for decrypt)] [input file name] [output file name]\n");
+		return -1;
+	}
+	key = malloc(sizeof(argv[1]));
+	key = argv[1];
+	choice = atoi(argv[2]);
+	inputFile = malloc(sizeof(argv[3]));
+	inputFile = argv[3];
+	outputFile = malloc(sizeof(argv[4]));
+	outputFile = argv[4];
+	
+	FILE *input = fopen(inputFile, "rb");
 	if(input == NULL)
 	{
 			printf("Could not find file\n");
 			exit(1);
 	}
-	FILE *output = fopen("out.txt", "w");
-	char *encrypt = calloc(26, sizeof(char));
-	char *decrypt = calloc(26, sizeof(char));
-	
-	//need to check if encryption or decryption here
-	processInput(input, output, encrypt);
+	FILE *output = fopen(outputFile, "w");
+	char *substitute = calloc(26, sizeof(char));
+
+	processInput(input, output, substitute);
 
 	fclose(input);
 	fclose(output);
@@ -97,7 +111,7 @@ void initializeEncryptArray(char key[], char encrypt[])
 void processInput(FILE * inf, FILE * outf, char substitute[])
 {
 	//later here will need to use argv[n] to get the key
-	char *key = "feather";
+	//char *key = "feather";
 	char *input;
 	
 	//get the size of the input file
@@ -110,42 +124,42 @@ void processInput(FILE * inf, FILE * outf, char substitute[])
 	fgets(input, size, (FILE*)inf);
 	printf("File contents: %s\n", input);
 	
-	/////////////////////////////////////////////
-	//if encrypt, initialize encrypt, else decrypt
-	/////////////////////////////////////////////
-	//initialize array for encryption
+	//initialize array for encryption or decryption
 	initializeEncryptArray(key, substitute);
-	printf("Subst: %s\n", substitute);
+	//pos is the position of the letter in the substitute array
 	int pos;
 	int i;
-	for(i = 0; i < strlen(input); i++)
+	
+	if(choice == 1)
 	{
-		pos = targetFound(substitute, 25, input[i]);
-		if(pos >= 0)
+		for(i = 0; i < strlen(input); i++)
 		{
-			input[i] = (97+pos);
+			pos = targetFound(substitute, 25, input[i]);
+			if(pos >= 0)
+			{
+				input[i] = (97+pos);
+			}
 		}
+		printf("Input Encrypted: %s\n", input);
+		fprintf(outf, "%s", input);
+		printf("Encrypted file created.\n");
 	}
-	printf("Input Encrypted: %s\n", input);
-	//fprintf(outf, "%s", input);
-	//printf("Encrypted file created.\n");
-	
-	///////////////////////////////////////////
-	//ELSE////////////////////////////////////
-	///////////////////////////////////////////
-	for(i = 0; i < strlen(input); i++)
+	else
 	{
-		int num = (input[i] - 97);
-		if(num >= 0)
+		for(i = 0; i < strlen(input); i++)
 		{
-			input[i] = substitute[input[i] - 97];
+			int num = (input[i] - 97);
+			if(num >= 0)
+			{
+				printf("Input[%d]: %c\n", i, input[i]);
+				input[i] = substitute[input[i] - 97];
+			}
 		}
+		
+		printf("Input Dencrypted: %s\n", input);
+		fprintf(outf, "%s", input);
+		printf("Dencrypted file created.\n");
 	}
-	
-	printf("Input Dencrypted: %s\n", input);
-	fprintf(outf, "%s", input);
-	printf("Dencrypted file created.\n");
-	
 	
 }
 
