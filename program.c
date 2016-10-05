@@ -15,19 +15,21 @@ void processInput(FILE * inf, FILE * outf, char substitute[]);
 int main()
 {
 
-FILE *input = fopen("test.txt", "rb");
-if(input == NULL)
-{
-		printf("Could not find file\n");
-		exit(1);
-}
-FILE *output = fopen("out.txt", "w");
-char *encrypt = calloc(26, sizeof(char));
-char *decrypt = calloc(26, sizeof(char));
+	FILE *input = fopen("test.txt", "rb");
+	if(input == NULL)
+	{
+			printf("Could not find file\n");
+			exit(1);
+	}
+	FILE *output = fopen("out.txt", "w");
+	char *encrypt = calloc(26, sizeof(char));
+	char *decrypt = calloc(26, sizeof(char));
+	
+	//need to check if encryption or decryption here
+	processInput(input, output, encrypt);
 
-//need to check if encryption or decryption here
-processInput(input, output, encrypt);
-
+	fclose(input);
+	fclose(output);
 }
 
 char * removeDuplicates(char word[])
@@ -59,7 +61,7 @@ int targetFound(char charArray[], int num, char target)
 		}
 		x--;
 	}
-	return 0;
+	return -1;
 }
 
 void initializeEncryptArray(char key[], char encrypt[])
@@ -95,7 +97,7 @@ void initializeEncryptArray(char key[], char encrypt[])
 void processInput(FILE * inf, FILE * outf, char substitute[])
 {
 	//later here will need to use argv[n] to get the key
-	char *key = "hello";
+	char *key = "feather";
 	char *input;
 	
 	//get the size of the input file
@@ -113,19 +115,39 @@ void processInput(FILE * inf, FILE * outf, char substitute[])
 	/////////////////////////////////////////////
 	//initialize array for encryption
 	initializeEncryptArray(key, substitute);
+	printf("Subst: %s\n", substitute);
 	int pos;
 	int i;
 	for(i = 0; i < strlen(input); i++)
 	{
 		pos = targetFound(substitute, 25, input[i]);
-		if(pos != 0)
+		if(pos >= 0)
 		{
-			printf("Before: %c\n", input[i]);
-			input[i] = substitute[pos];
-			printf("After: %c\n", input[i]);
+			input[i] = (97+pos);
 		}
 	}
 	printf("Input Encrypted: %s\n", input);
+	//fprintf(outf, "%s", input);
+	//printf("Encrypted file created.\n");
+	
+	///////////////////////////////////////////
+	//ELSE////////////////////////////////////
+	///////////////////////////////////////////
+	for(i = 0; i < strlen(input); i++)
+	{
+		int num = (input[i] - 97);
+		if(num >= 0)
+		{
+			input[i] = substitute[input[i] - 97];
+		}
+	}
+	
+	printf("Input Dencrypted: %s\n", input);
+	fprintf(outf, "%s", input);
+	printf("Dencrypted file created.\n");
+	
+	
 }
+
 
 
